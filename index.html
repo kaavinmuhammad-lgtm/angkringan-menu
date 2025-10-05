@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angkringan Onokabe II - Menu Kuliner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* base and layout styles (single consolidated block) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background-color: #f8f5f2; color: #333; line-height: 1.6; }
+        header { background: linear-gradient(135deg,#8B4513,#D2691E); color:#fff; padding:20px; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+        header h1{ font-size:2.5em; margin-bottom:5px; }
+        header p{ font-size:1.1em; opacity:.9 }
+        nav{ background:#D2691E; padding:10px; text-align:center }
+        nav button{ background:none; border:none; color:#fff; padding:10px 20px; margin:0 5px; cursor:pointer; border-radius:20px }
+        nav button:hover, nav button.active{ background:rgba(255,255,255,.2) }
+        .search-container{ padding:20px; text-align:center; background:#fff; margin:20px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.1) }
+        #searchInput{ width:70%; max-width:400px; padding:12px; border:2px solid #D2691E; border-radius:25px; font-size:1em; outline:none }
+        #searchInput:focus{ border-color:#8B4513 }
+        .menu-container{ padding:20px; max-width:1200px; margin:0 auto }
+        .menu-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; margin-top:20px }
+        .menu-card{ background:#fff; border-radius:15px; overflow:hidden; box-shadow:0 4px 15px rgba(0,0,0,.1); transition:transform .3s,box-shadow .3s }
+        .menu-card:hover{ transform:translateY(-5px); box-shadow:0 6px 20px rgba(0,0,0,.15) }
+        .menu-card img{ width:100%; height:150px; object-fit:cover }
+        .menu-card h3{ padding:15px; color:#8B4513; font-size:1.2em }
+        .menu-card p{ padding:0 15px 15px; color:#666 }
+        .price{ font-weight:bold; color:#D2691E; font-size:1.1em; padding:0 15px }
+        .order-btn{ width:100%; padding:12px; background:#4CAF50; color:#fff; border:none; cursor:pointer; border-radius:0 0 15px 15px }
+        .order-btn:hover{ background:#45a049 }
+        .info-section{ background:#fff; margin:40px 20px; padding:30px; border-radius:15px; box-shadow:0 4px 15px rgba(0,0,0,.1); text-align:center }
+        .info-section h2{ color:#8B4513; margin-bottom:20px }
+        .info-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-top:20px }
+        .info-item{ padding:15px; background:#f8f5f2; border-radius:10px }
+        .order-links{ margin-top:20px }
+        .order-links a{ display:inline-block; margin:10px; padding:12px 24px; background:#D2691E; color:#fff; text-decoration:none; border-radius:25px }
+        .order-links a:hover{ background:#8B4513 }
+    .cart{ position:fixed; top:20px; right:20px; background:#D2691E; color:#fff; padding:10px 15px; border-radius:50px; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.2); z-index:1000 }
+        .cart:hover{ background:#8B4513 }
+        .cart-count{ background:#4CAF50; border-radius:50%; padding:2px 6px; font-size:.8em; margin-left:5px }
+    #cartModal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); z-index:1001 }
+    /* Order modal should appear above cart modal so its buttons are clickable */
+    #orderModal{ display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.5); z-index:1002 }
+        .modal-content{ background:#fff; margin:10% auto; padding:20px; width:80%; max-width:500px; border-radius:15px; max-height:70vh; overflow-y:auto }
+        .close{ float:right; font-size:28px; font-weight:bold; cursor:pointer }
+        .close:hover{ color:#D2691E }
+        .cart-items{ margin:20px 0 }
+        .cart-item{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee }
+        .total{ font-weight:bold; font-size:1.2em; color:#8B4513; margin-top:20px }
+        .checkout-btn{ width:100%; padding:12px; background:#4CAF50; color:#fff; border:none; border-radius:25px; font-size:1em; cursor:pointer; margin-top:10px }
+        .hidden{ display:none }
+        @media (max-width:768px){ .menu-grid{ grid-template-columns:1fr } #searchInput{ width:90% } header h1{ font-size:2em } }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🍲 Angkringan Onokabe II</h1>
+        <p>Nikmati Best Seller Nasi Bakar Cumi dan Ayam Serta Teh Tarik Hot and Freeze</p>
+        
+    </header>
+
+    <nav>
+        <button class="active" onclick="filterMenu('all')">Semua</button>
+        <button onclick="filterMenu('makanan')">Makanan</button>
+        <button onclick="filterMenu('minuman')">Minuman</button>
+    </nav>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Cari menu favorit Anda..." onkeyup="searchMenu()">
+    </div>
+
+    <div class="menu-container">
+        <div id="menuGrid" class="menu-grid">
+            <!-- Menu cards will be populated by JS -->
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h2>🕕 Informasi Toko</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <h3>Jam Operasional</h3>
+                <p>18.00 – 00.00 WIB</p>
+            </div>
+            <div class="info-item">
+                <h3>Lokasi</h3>
+                <p>Desa Cipeujeuh Wetan, Kecamatan Lemahabang, Kabupaten Cirebon.<br>Dekat gapura perbatasan Cipeujeuh Kulon – Cipeujeuh Wetan.</p>
+            </div>
+        </div>
+        <div class="order-links">
+            <h3>Pemesanan Online</h3>
+            <a href="https://shopeefood.co.id/" target="_blank">Pesan via ShopeeFood</a>
+            <a href="https://grab.com/id/food/" target="_blank">Pesan via GrabFood</a>
+        </div>
+    </div>
+
+    <!-- Cart Button -->
+    <div class="cart" onclick="toggleCart()">
+        🛒 Keranjang <span id="cartCount" class="cart-count">0</span>
+    </div>
+
+    <!-- Cart Modal -->
+    <div id="cartModal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleCart()">&times;</span>
+            <h2>Keranjang Pesanan</h2>
+            <div id="cartItems" class="cart-items"></div>
+            <div id="cartTotal" class="total">Total: Rp 0</div>
+            <button class="checkout-btn" onclick="checkout()">Checkout & Pesan</button>
+        </div>
+    </div>
+
+    <!-- Order Send Modal (Email / WhatsApp) -->
+    <div id="orderModal">
+        <div class="modal-content">
+            <span class="close" onclick="toggleOrderModal()">&times;</span>
+            <h2>Kirim Pesanan</h2>
+            <div id="orderSummary" style="text-align:left; white-space:pre-wrap; margin-bottom:12px"></div>
+            <!-- If OWNER_WA is configured we only need a short name from customer -->
+            <label>Nama singkat (untuk penerima): <input type="text" id="custName" placeholder="Nama singkat" style="width:100%; padding:8px; margin:6px 0"></label>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button class="checkout-btn" onclick="sendOrder()">Kirim ke WA Pemilik</button>
+                <button class="checkout-btn" style="background:#D2691E" onclick="cancelOrderSend()">Batal</button>
+            </div>
+            
+            <p style="font-size:0.9em; color:#666; margin-top:8px">Pesanan akan dikirim ke pemilik (WhatsApp). Pelanggan hanya perlu mengisi nama singkat.</p>
+        </div>
+    </div>
+
+    
+
+    
+
+    <script>
+        // Full script: render, search, filter, cart
+        // (Re-declare menuData to keep code simple since file was edited earlier)
+        const menuData = [
+            { id: 1, name: 'Nasi Bakar Ayam', price: 7000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Nasi+Bakar+Ayam', desc: 'Best Seller - Nasi bakar dengan ayam suwir pedas.' },
+            { id: 2, name: 'Nasi Bakar Cumi', price: 7000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Nasi+Bakar+Cumi', desc: 'Best Seller - Nasi bakar dengan cumi-cumi segar.' },
+            { id: 3, name: 'Nasi Kucing', price: 3000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Nasi+Kucing', desc: 'Nasi kecil dengan lauk sederhana.' },
+            { id: 4, name: 'Mie Goreng', price: 8000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Mie+Goreng', desc: 'Mie goreng spesial dengan bumbu rumahan.' },
+            { id: 5, name: 'Mie Rebus', price: 8000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Mie+Rebus', desc: 'Mie rebus hangat dengan kuah kaldu.' },
+            { id: 6, name: 'Sate Kulit (per tusuk)', price: 3000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Sate+Kulit', desc: 'Sate kulit ayam renyah.' },
+            { id: 7, name: 'Sate Ampela (per tusuk)', price: 3000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Sate+Ampela', desc: 'Sate ampela empuk.' },
+            { id: 8, name: 'Baso (per tusuk)', price: 3000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Baso', desc: 'Sate baso daging halus.' },
+            { id: 9, name: 'Sosis Kecil (per tusuk)', price: 3000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Sosis+Kecil', desc: 'Sate sosis kecil gurih.' },
+            { id: 10, name: 'Kornet (per tusuk)', price: 3000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Kornet', desc: 'Sate kornet pedas manis.' },
+            { id: 11, name: 'Sosis Jumbo', price: 5000, category: 'makanan', image: 'https://via.placeholder.com/200x150?text=Sosis+Jumbo', desc: 'Sosis jumbo panggang.' },
+            { id: 12, name: 'Teh Tarik', price: 5000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Teh+Tarik', desc: 'Best Seller - Teh susu tarik hangat.' },
+            { id: 13, name: 'GoodDay Freeze', price: 5000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=GoodDay+Freeze', desc: 'Best Seller - GoodDay dingin segar.' },
+            { id: 14, name: 'Teajus', price: 2000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Teajus', desc: 'Teh jeruk dingin.' },
+            { id: 15, name: 'Nutrisari', price: 3000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Nutrisari', desc: 'Minuman buah instan.' },
+            { id: 16, name: 'Susu Putih', price: 3000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Susu+Putih', desc: 'Susu segar polos.' },
+            { id: 17, name: 'Kopi Kapal Api', price: 4000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Kopi+Kapal+Api', desc: 'Kopi hitam klasik.' },
+            { id: 18, name: 'Kopi ABC', price: 4000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Kopi+ABC', desc: 'Kopi susu ABC.' },
+            { id: 19, name: 'Kopi Luwak', price: 4000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Kopi+Luwak', desc: 'Kopi luwak istimewa.' },
+            { id: 20, name: 'Susu Cokelat', price: 3000, category: 'minuman', image: 'https://via.placeholder.com/200x150?text=Susu+Cokelat', desc: 'Susu cokelat manis.' }
+        ];
+
+    let currentCategory = 'all';
+        let cart = [];
+
+    // OWNER CONFIG - set these to your email/WA number if you want orders sent to you automatically
+    // Example: OWNER_EMAIL = 'owner@example.com'; OWNER_WA = '62812...';
+    const OWNER_EMAIL = '';
+    const OWNER_WA = '6285962530714';
+    // Public host where site will be published (used by QR generator)
+    const OWNER_HOST = 'https://tranquil-gingersnap-0e8e8d.netlify.app';
+    // OWNER_QRIS removed — QRIS/payment QR functionality disabled.
+
+        function formatPrice(n) {
+            return 'Rp ' + n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function renderMenu() {
+            const grid = document.getElementById('menuGrid');
+            grid.innerHTML = '';
+            const rawQuery = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+            const normalizeToken = t => t.replace(/[^a-z0-9]+/g, '').replace(/nya$/g, '');
+            const queryTokens = rawQuery.split(/\s+/).map(normalizeToken).filter(Boolean);
+
+            const items = menuData.filter(item => {
+                if (currentCategory !== 'all' && item.category !== currentCategory) return false;
+                if (queryTokens.length === 0) return true;
+                const hay = (item.name + ' ' + (item.desc || '')).toLowerCase();
+                const hayClean = hay.replace(/[^a-z0-9]+/g, ' ');
+                return queryTokens.every(tok => hayClean.includes(tok));
+            });
+
+            if (items.length === 0) {
+                const no = document.createElement('div');
+                no.className = 'info-item';
+                no.style.gridColumn = '1 / -1';
+                no.style.textAlign = 'center';
+                no.textContent = 'Tidak ada menu yang cocok.';
+                grid.appendChild(no);
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'menu-card';
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <h3>${item.name}</h3>
+                    <p class="price">${formatPrice(item.price)}</p>
+                    <p>${item.desc || ''}</p>
+                    <button class="order-btn" onclick="addToCart(${item.id})">Tambah ke Keranjang</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterMenu(cat) {
+            currentCategory = cat;
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`filterMenu('${cat}')`));
+            });
+            renderMenu();
+        }
+
+        function searchMenu() { renderMenu(); }
+
+        function addToCart(id) {
+            const item = menuData.find(m => m.id === id);
+            if (!item) return;
+            const existing = cart.find(c => c.id === id);
+            if (existing) existing.qty += 1; else cart.push({ ...item, qty: 1 });
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const countSpan = document.getElementById('cartCount');
+            const totalQty = cart.reduce((s, i) => s + i.qty, 0);
+            countSpan.textContent = totalQty;
+            const cartItems = document.getElementById('cartItems');
+            cartItems.innerHTML = '';
+            cart.forEach(i => {
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `<div>${i.name} x ${i.qty}</div><div>${formatPrice(i.price * i.qty)}</div>`;
+                cartItems.appendChild(div);
+            });
+            const cartTotal = document.getElementById('cartTotal');
+            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+            cartTotal.textContent = 'Total: ' + formatPrice(total);
+        }
+
+        function toggleCart() {
+            const modal = document.getElementById('cartModal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function checkout() {
+            if (cart.length === 0) { alert('Keranjang kosong. Silakan tambah menu terlebih dahulu.'); return; }
+            // show order modal with summary
+            const summary = buildOrderMessage();
+            document.getElementById('orderSummary').textContent = summary;
+            toggleOrderModal();
+        }
+
+        function toggleOrderModal() {
+            const m = document.getElementById('orderModal');
+            const cartM = document.getElementById('cartModal');
+            const opening = m.style.display !== 'block';
+            if (opening && cartM) cartM.style.display = 'none';
+            m.style.display = opening ? 'block' : 'none';
+        }
+
+        function buildOrderMessage() {
+            let lines = [];
+            lines.push('Pesanan dari Angkringan Onokabe II');
+            lines.push('--------------------------------');
+            cart.forEach(i => lines.push(`${i.name} x ${i.qty} = ${formatPrice(i.price * i.qty)}`));
+            const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+            lines.push('--------------------------------');
+            lines.push('Total: ' + formatPrice(total));
+            return lines.join('\n');
+        }
+
+        function sendOrder() {
+            const name = (document.getElementById('custName').value || '').trim();
+
+            if (!cart || cart.length === 0) {
+                alert('Keranjang kosong. Silakan tambahkan item sebelum checkout.');
+                return;
+            }
+
+            if (!name) {
+                alert('Masukkan nama singkat Anda sebelum mengirim pesanan.');
+                const inp = document.getElementById('custName');
+                if (inp) inp.focus();
+                return;
+            }
+
+            const summary = buildOrderMessage();
+            const body = ('Nama: ' + name + '\n') + summary + '\n\nTerima kasih.';
+
+            // send directly to owner via WhatsApp (required)
+            if (OWNER_WA) {
+                const cleanOwner = OWNER_WA.replace(/[^0-9]/g, '');
+                const waOwner = `https://wa.me/${cleanOwner}?text=${encodeURIComponent(body)}`;
+                window.open(waOwner, '_blank');
+                alert('Pesanan sedang dibuka di WhatsApp pemilik. Pastikan WhatsApp Web/atau aplikasi terbuka.');
+            } else {
+                alert('Nomor pemilik belum diset. Silakan set OWNER_WA di kode.');
+            }
+
+            // clear cart and update UI
+            cart = [];
+            updateCartDisplay();
+            // close modals
+            const orderModal = document.getElementById('orderModal');
+            if (orderModal) orderModal.style.display = 'none';
+            const cartModal = document.getElementById('cartModal');
+            if (cartModal) cartModal.style.display = 'none';
+        }
+
+        function cancelOrderSend() {
+            toggleOrderModal();
+        }
+
+        // QRIS/QR functionality removed per request.
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMenu();
+            updateCartDisplay();
+            const input = document.getElementById('searchInput');
+            input.addEventListener('input', searchMenu);
+        });
+    </script>
+</body>
+</html>
